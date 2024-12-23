@@ -21,7 +21,7 @@ cd your-repository-name
 cp sample.env .env
 ```
 
-.. And replae the `OPENAI_API_KEY` by your Open AI api key
+.. And replace the `OPENAI_API_KEY` by your Open AI api key
 
 ### 3. Run the app
 
