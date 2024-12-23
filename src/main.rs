@@ -119,12 +119,17 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init();
 
+    // Get the port from the environment variable or default to 8080
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let port: u16 = port.parse().expect("PORT must be a valid u16 number");
+
+    // Start the HTTP server
     HttpServer::new(|| {
         App::new()
             .service(process_items) // Register the POST handler
             .service(get_models) // Register the GET handler
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", port))? // Bind to 0.0.0.0 and the dynamic port
     .run()
     .await
 }
