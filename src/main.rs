@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,13 @@ struct ChatMessage {
 
 fn get_prompt(items: &Vec<String>) -> String {
     format!(
-        "Please suggest me at most 5 recipes based on the items I provide and feel free to add some condiments I did not mention to make it possible: {:?}. Please only send me an array or json objects with keys: name (name of the dish), ingredients (all ingredients in that dish), additional_condiments (all ingredients that was not included in the initial list but added by you), prep_instrucions (an array of steps for the instructions)",
+        "Please suggest me at most 5 recipes based on the items I provide. Feel free to add condiments I did not mention to make it possible. Respond with an array of exactly 1 to 5 JSON objects, each containing the following keys and their respective values: \
+        - name: The name of the dish (string). \
+        - ingredients: A list of all ingredients in the dish (array of strings). \
+        - additional_condiments: A list of condiments added to the recipe that were not included in the provided items (array of strings). \
+        - prep_instructions: An array of steps for preparing the dish (array of strings). \
+        - nutritional_info: An object with keys protein, carbs, fat, and total_calories, with values as numbers representing the quantities (in grams or calories). \
+        Items provided: {:?}. Ensure the response strictly adheres to this structure.",
         items
     )
 }
@@ -123,13 +130,19 @@ async fn main() -> std::io::Result<()> {
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let port: u16 = port.parse().expect("PORT must be a valid u16 number");
 
-    // Start the HTTP server
+    // Start the HTTP server with CORS enabled
     HttpServer::new(|| {
         App::new()
-            .service(process_items) // Register the POST handler
-            .service(get_models) // Register the GET handler
+            .wrap(
+                Cors::default()
+                    .allow_any_origin() // Allow requests from any origin
+                    .allow_any_method() // Allow GET, POST, OPTIONS, etc.
+                    .allow_any_header(), // Allow any headers (e.g., Content-Type)
+            )
+            .service(process_items) // Register the POST /recipes handler
+            .service(get_models) // Register the GET /models handler
     })
-    .bind(("0.0.0.0", port))? // Bind to 0.0.0.0 and the dynamic port
+    .bind(("0.0.0.0", port))? // Bind to 0.0.0.0 and the specified port
     .run()
     .await
 }
