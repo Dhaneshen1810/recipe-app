@@ -18,11 +18,11 @@ struct ChatMessage {
 
 fn get_prompt(items: &Vec<String>) -> String {
     format!(
-        "Please suggest me at most 5 recipes based on the items I provide. Feel free to add condiments I did not mention to make it possible. Respond with an array of exactly 1 to 5 JSON objects, each containing the following keys and their respective values: \
+        "Please suggest me at most 5 recipes based on the items I provide. Feel free to add condiments I did not mention to make it possible. Please also include the quantity of the ingredients to use. Respond with an array of exactly 1 to 5 JSON objects, each containing the following keys and their respective values: \
         - name: The name of the dish (string). \
         - ingredients: A list of all ingredients in the dish (array of strings). \
         - additional_condiments: A list of condiments added to the recipe that were not included in the provided items (array of strings). \
-        - prep_instructions: An array of steps for preparing the dish (array of strings). \
+        - prep_instructions: An array of steps for preparing the dish (array of strings, do not include numbering). \
         - nutritional_info: An object with keys protein, carbs, fat, and total_calories, with values as numbers representing the quantities (in grams or calories). \
         Items provided: {:?}. Ensure the response strictly adheres to this structure.",
         items
